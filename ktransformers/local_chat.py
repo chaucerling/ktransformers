@@ -1,8 +1,8 @@
 """
-Description  :  
+Description  :
 Author       : Boxin Zhang, Azure-Tang
 Version      : 0.1.0
-Copyright (c) 2024 by KVCache.AI, All Rights Reserved. 
+Copyright (c) 2024 by KVCache.AI, All Rights Reserved.
 """
 
 import os
@@ -82,16 +82,16 @@ def local_chat(
             if (
                 "Qwen2Moe" in config.architectures[0]
             ):  # Qwen2Moe must use flash_attention_2 to avoid overflow.
-                config._attn_implementation = "flash_attention_2"
+                config._attn_implementation = "eager"
             if "Llama" in config.architectures[0]:
                 config._attn_implementation = "eager"
             if "Mixtral" in config.architectures[0]:
-                config._attn_implementation = "flash_attention_2"
+                config._attn_implementation = "eager"
 
             model = custom_models[config.architectures[0]](config)
         else:
             model = AutoModelForCausalLM.from_config(
-                config, trust_remote_code=True, attn_implementation="flash_attention_2"
+                config, trust_remote_code=True, attn_implementation="eager"
             )
 
     if optimize_rule_path is None:
@@ -108,7 +108,7 @@ def local_chat(
             "please input the path of your gguf file(gguf file in the dir containing input gguf file must all belong to current model):"
         )
     optimize_and_load_gguf(model, optimize_rule_path, gguf_path, config)
-    
+
     try:
             model.generation_config = GenerationConfig.from_pretrained(model_path)
     except:
@@ -154,7 +154,7 @@ def local_chat(
                 content = "Please write a piece of quicksort code in C++."
         elif os.path.isfile(content):
             content = open(content, "r").read()
-            
+
         messages = [{"role": "user", "content": content}]
         input_tensor = tokenizer.apply_chat_template(
             messages, add_generation_prompt=True, return_tensors="pt"

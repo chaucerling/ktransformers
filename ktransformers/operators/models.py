@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # coding=utf-8
 """
-Description  :  
+Description  :
 Author       : Azure-Tang
 Date         : 2024-07-25 11:25:24
 Version      : 1.0.0
-LastEditors  : Azure 
+LastEditors  : Azure
 LastEditTime : 2024-08-27 07:29:04
-Copyright (c) 2024 by KVCache.AI, All Rights Reserved. 
+Copyright (c) 2024 by KVCache.AI, All Rights Reserved.
 """
 
 import inspect
@@ -19,7 +19,6 @@ import torch.nn.functional as F
 import torch.utils.checkpoint
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
-from ktransformers.operators.dynamic_attention import DynamicScaledDotProductAttention
 from ktransformers.server.config.config import Config
 import os
 import yaml
@@ -625,7 +624,7 @@ class KDeepseekV2Model(BaseInjectedModule):
             if use_legacy_cache:
                 past_key_values = DynamicCache.from_legacy_cache(past_key_values)
             past_key_values_length = past_key_values.get_usable_length(seq_length)
-        
+
         if inputs_embeds is None:
             org_device = input_ids.device
             # TODO move to embed_tokens's device, not hard code to cpu
@@ -976,6 +975,7 @@ class KLlamaModel(BaseInjectedModule):
             self.long_context_config = config_yaml.get("long_context")
             self.ext_config = config_yaml.get("ext")
 
+        from ktransformers.operators.dynamic_attention import DynamicScaledDotProductAttention
         KLlamaModel.dynamic_sdpa = DynamicScaledDotProductAttention(
             max_seq_len=self.long_context_config["max_seq_len"],
             block_size=self.long_context_config["block_size"],

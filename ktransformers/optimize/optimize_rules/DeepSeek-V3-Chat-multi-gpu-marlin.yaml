@@ -24,27 +24,27 @@
       prefill_device: "cuda:1"
 
 - match:
-    name: "^model\\.layers\\.(0|[1-9]|[12][0-9])\\.(?!self_attn\\.kv_b_proj).*$"  # regular expression 
+    name: "^model\\.layers\\.(0|[1-9]|[12][0-9])\\.(?!self_attn\\.kv_b_proj).*$"  # regular expression
     class: torch.nn.Linear  # only match modules matching name and class simultaneously
   replace:
     class: ktransformers.operators.linear.KTransformersLinear  # optimized Kernel on quantized data types
     kwargs:
       generate_device: "cuda:0"
       prefill_device: "cuda:0"
-      generate_op: "KLinearMarlin"
+      generate_op: "KLinearTorch"
       prefill_op: "KLinearTorch"
 
 - match:
-    name: "^model\\.layers\\.([3456][0-9])\\.(?!self_attn\\.kv_b_proj).*$"  # regular expression 
+    name: "^model\\.layers\\.([3456][0-9])\\.(?!self_attn\\.kv_b_proj).*$"  # regular expression
     class: torch.nn.Linear  # only match modules matching name and class simultaneously
   replace:
     class: ktransformers.operators.linear.KTransformersLinear  # optimized Kernel on quantized data types
     kwargs:
       generate_device: "cuda:1"
       prefill_device: "cuda:1"
-      generate_op: "KLinearMarlin"
+      generate_op: "KLinearTorch"
       prefill_op: "KLinearTorch"
-  
+
 - match:
     name: "^model\\.layers\\.(0|[1-9]|[12][0-9])\\.mlp$"
     class: ktransformers.models.modeling_deepseek_v3.DeepseekV3MoE
@@ -82,7 +82,7 @@
 - match:
     name: "^model\\.layers\\.(0|[1-4])\\.mlp\\.experts$" # inject experts in layer 0~4 as marlin expert
   replace:
-    class: ktransformers.operators.experts.KTransformersExperts  
+    class: ktransformers.operators.experts.KTransformersExperts
     kwargs:
       generate_device: "cuda:0" # run in cuda:0
       generate_op:  "KExpertsMarlin"
@@ -95,7 +95,7 @@
     kwargs:
       generate_device: "cuda:1"
       generate_op:  "KExpertsMarlin"
-  recursive: False 
+  recursive: False
 
 - match:
     name: "^model\\.layers\\.(0|[1-9]|[12][0-9])\\.mlp\\.experts$"
@@ -141,7 +141,7 @@
     class: "ktransformers.operators.models.KDeepseekV2Model"
     kwargs:
       per_layer_prefill_intput_threshold: 0 # 0 is close layer wise prefill
-      transfer_map: 
+      transfer_map:
         30: "cuda:1"
 
 - match:
