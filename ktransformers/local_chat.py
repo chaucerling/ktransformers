@@ -51,6 +51,11 @@ default_optimize_rules = {
     "MixtralForCausalLM": ktransformer_rules_dir + "Mixtral.yaml",
 }
 
+# Check CUDA GPU supports FlashAttention2
+def support_flash_attention_2(device_id: str = "cuda"):
+    major, _minor = torch.cuda.get_device_capability(device_id)
+    # GPU architecture is Ampere (SM 8.x) or newer
+    return major >= 8
 
 def local_chat(
     model_path: str | None = None,
@@ -79,7 +84,7 @@ def local_chat(
 
     with torch.device("meta"):
         if config.architectures[0] in custom_models:
-            print("using custom modeling_xxx.py.")
+            print("using custom modeling_xxx.py.", config)
             if (
                 "Qwen2Moe" in config.architectures[0]
             ):  # Qwen2Moe must use flash_attention_2 to avoid overflow.
